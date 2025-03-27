@@ -138,8 +138,6 @@ http://localhost:8057/redPackageRainApi/snatchRedPackageMergeRequest
 #### 视频解说
 哔哩哔哩视频地址：https://space.bilibili.com/353586723/channel/collectiondetail?sid=2589561
 
-#### 视频解说
-哔哩哔哩视频地址：https://space.bilibili.com/353586723/channel/collectiondetail?sid=2589561
 
 #### 部署说明
 
