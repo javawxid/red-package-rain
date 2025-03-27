@@ -1,0 +1,17 @@
+[Unit]
+Description=security-oauth2
+# 注解：描述了服务的功能，方便系统管理员了解该服务的作用。
+After=syslog.target network.target remote-fs.target nss-lookup.target
+# 注解：指定了服务启动的顺序，这里在syslog、网络、远程文件系统和名称解析服务之后启动。
+[Service]
+Type=forking
+# 注解：指定了服务的类型，forking表示服务将以独立进程的方式启动。
+ExecStart=/opt/app/spring-cloud-security-oauth2/security-oauth2-start.sh
+# 注解：指定了启动服务的命令。
+ExecStop=/opt/app/spring-cloud-security-oauth2/security-oauth2-stop.sh
+# 注解：指定了停止服务的命令。
+PrivateTmp=true
+# 注解：表示服务应该在私有临时文件系统中运行，避免服务间的文件冲突。
+[Install]
+WantedBy=multi-user.target
+# 注解：指定了服务应该被添加到哪个运行级别，这里是在多用户目标运行级别。

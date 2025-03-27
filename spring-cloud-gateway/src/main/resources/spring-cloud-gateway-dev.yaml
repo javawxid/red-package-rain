@@ -1,0 +1,148 @@
+# server配置
+server:
+  compression:
+    # 启用数据压缩，默认为false。配置完成后，当客户端请求的Accept-Encoding头中包含“gzip”或“deflate”时，Tomcat会自动压缩响应数据并返回。
+    enabled: true
+    # 需要压缩的数据类型列表，支持多个值，用逗号分隔。
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    # 响应数据的最小大小（字节），只有响应数据大小超过该值才会进行压缩。
+    min-response-size: 1024
+  # 服务端口
+  port: 8087
+  tomcat:
+    threads:
+      # 最多的工作线程数，默认大小是200。该参数相当于临时工，
+      # 处理请求的能力还受到其他因素的影响，如CPU的时钟周期、内存可用性、网络带宽等。举个例子i9-12900k的时钟周期为3.2GHz，这意味着它每秒钟可以执行3.2×10^9次操作。
+      # 如果服务器内存不足，操作系统可能会频繁地进行页面交换，这将增加线程调度的开销，如果内存不足，操作系统可能会限制新的连接或请求，线程阻塞或被频繁地终止和重新创建，缓存机制可能无法正常工作，导致频繁的缓存失效和额外的磁盘I/O操作。如果堆大小设置得太小，可能会导致频繁的Full GC（垃圾回收），影响应用的响应速度和吞吐量。
+      # 通常情况下100M带宽，每次请求低于1kb的场景下，能支持1万以上的QPS，实际影响QPS有多方面的因素，需要综合考虑。通常情况下，cpu核心数会限制并发连接数，八核心的cpu最佳的并发连接数在8000左右，多了会增加上下文切换的资源影响性能。
+      max: 8000
+      # 最少的工作线程数，默认大小是10。该参数相当于长期工，如果并发请求的数量达不到10，就会依次使用这几个线程去处理请求。如果min-spare设置得太低，那么当应用程序接收到高并发请求时，线程池将无法满足服务要求而导致请求失败。
+      # 较高的min-spare值可能会导致系统响应时间变慢，因为它会创建大量线程来处理请求，这可能会占用过多的CPU和内存资源。如果将min-spare值设置得太低，则线程池可能无法及时响应请求。当系统负载较高时，有些请求可能会被暂时挂起，等待线程变得可用。
+      # 如果没有足够的空闲线程，则请求将会等待更长时间。设置较高的min-spare值会占用更多的内存资源。如果线程池中的线程数超出了系统的实际需求，则会浪费内存资源。因此，将min-spare值设置为10至20是一种平衡内存和线程利用率的方式。
+      min-spare: 1000
+      # 最大连接数，默认大小是8192。表示Tomcat可以处理的最大请求数量，超过8192的请求就会被放入到等待队列。如果设置为-1，则禁用maxconnections功能，表示不限制tomcat容器的连接数。
+      # 如果设置的值太低，将会限制服务器处理客户端请求的能力，从而可能导致应用程序出现性能问题。如果设置的值太高，则会浪费服务器资源，因为服务器的处理能力可能不足以处理所有的连接。
+      # 通过经验和测试，2到4倍的QPS值通常会在服务器处理客户端请求时提供最佳性能和稳定性。这个范围也会提供一定的缓冲以应对突发流量，从而在服务器资源短缺时避免过载。
+    max-connections: -1
+    # 等待队列的长度，默认大小是100。设置过高的accept-count会增加系统负担和内存压力，同时也可能会引起其他问题，如拒绝服务攻击等。至于为什么建议不超过5倍，是因为实际上超过这个范围的设置已经很少能带来明显的性能提升，反而会增加系统负担。同时，设置过高的accept-count还可能会导致频繁的连接请求失败和性能下降，甚至可能会导致Tomcat崩溃。
+    accept-count: 20000
+# 环境变量
+security:
+  oauth2:
+    environment: http://127.0.0.1:8097
+    appkey: iA0`bN0&lKJ3{vH0(
+# 网关鉴权
+auth:
+  gateway:
+    # 跳过过滤
+    shouldSkipUrls:
+      - /register
+      - /login/*
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+# spring配置
+spring:
+  cloud:
+    config:
+      name: spring-cloud-gateway
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            #允许所有ip跨域访问
+            allowedOriginPatterns: "*"
+            #允许所有请求方式
+            allowedMethods: "*"
+            #允许任何头进行跨域
+            allowedHeaders: "*"
+            #允许携带cookie
+            allowCredentials: true
+        add-to-simple-url-handler-mapping: true
+      discovery:
+        locator:
+          # 将spring.cloud.loadbalancer.ribbon.enabled属性设置为false，这将禁用Ribbon并使用Spring Cloud LoadBalancer作为默认的负载均衡器。
+          enabled: false
+          # 这将确保服务ID在转换为小写时用于路由。这通常用于确保服务ID的大小写不敏感。
+          lowerCaseServiceId: true
+      routes:
+        - id: user
+          uri: lb://user
+          predicates:
+            - Path=/user/**
+        - id: red-package-rain-api
+          uri: lb://red-package-rain-api
+          predicates:
+            - Path=/redPackageRainApi/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: '#{@userKeyResolver}'
+                # 令牌入桶的速度为每秒100个，相当于QPS
+                redis-rate-limiter.replenishRate: 16000000
+                # 桶内能装100个令牌，相当于峰值，要注意的是：第一秒从桶内能去200个，但是第二秒只能取到100个了，因为入桶速度是每秒100个
+                redis-rate-limiter.burstCapacity: 16000000
+                # 每个请求需要的令牌数
+                redis-rate-limiter.requestedTokens: 1
+  mvc:
+    async:
+      # 设置Spring MVC的异步请求的超时时间为20,000毫秒（20秒）。异步请求是指客户端发送请求到服务端后，不需要等待服务端处理完成就可以继续执行其他操作的一种请求方式。在这种请求方式下，可以提高系统的吞吐量和并发处理能力。通过设置异步请求的超时时间，可以控制请求的最大等待时间，避免长时间等待而占用系统资源。
+      request-timeout: 20000
+    # 静态路径模式为/**
+    static-path-pattern: /**
+  main:
+    # 允许覆盖bean定义
+    allow-bean-definition-overriding: true
+    # springboot2.2版本引入spring.main.lazy-initialization属性，配置为true会将所有Bean延迟初始化。
+    lazy-initialization: true
+  application:
+    #配置应用的名称，用于获取配置
+    name: spring-cloud-gateway
+  jmx:
+    # 关闭 Spring Boot 的JMX监控
+    enabled: false
+  jackson:
+    # 日期格式
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 时区
+    time-zone: GMT+8
+  devtools:
+    restart:
+      # 启用自动重启
+      enable: true
+  redis:
+    # 密码
+    password: admin
+    # 数据库
+    database: 0
+    # 集群模式
+    cluster:
+      nodes:
+        - 192.168.80.101:6371
+        - 192.168.80.101:6372
+        - 192.168.80.102:6371
+        - 192.168.80.102:6372
+        - 192.168.80.103:6371
+        - 192.168.80.103:6372
+      # 获取失败 最大重定向次数
+      max-redirects: 5
+    # 连接超时时间，单位是毫秒
+    timeout: 60000
+    lettuce:
+      # 配置线程池参数
+      pool:
+        # 最大活跃连接数 默认值为8
+        max-active: 1000
+        # 最大空闲连接数 默认值为8
+        max-idle: 16
+        # 最小空闲连接数 默认值为0
+        min-idle: 8
+        # 最大阻塞时间 （使用负值表示没有限制）默认值为-1
+        max-wait: -1
+        # 连接池功能是被启用的
+        enabled: true

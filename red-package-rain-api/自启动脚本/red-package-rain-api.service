@@ -1,0 +1,12 @@
+[Unit]
+Description=red-package-rain-api
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/app/red-package-rain-api/red-package-rain-api-start.sh
+ExecStop=/opt/app/red-package-rain-api/red-package-rain-api-stop.sh
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

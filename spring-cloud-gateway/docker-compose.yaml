@@ -1,0 +1,11 @@
+version: "3" #指定 Docker-Compose 版本
+services: #定义多个 Docker 容器服务
+  user: #定义服务apache-mybatis-demo
+    build: ./ #使用 Dockerfile 构建镜像
+    ports:
+      - "8087:8087" #暴露端口
+# 网络声明
+networks:
+  rmq:
+    name: rmq # 指定网络名称
+    driver: bridge # 指定网络驱动程序

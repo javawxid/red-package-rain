@@ -1,0 +1,59 @@
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+  port: 8067
+  tomcat:
+    threads:
+      max: 8000
+      min-spare: 1000
+    max-connections: -1
+    accept-count: 20000
+spring:
+  mvc:
+    async:
+      request-timeout: 20000
+    static-path-pattern: /**
+  main:
+    allow-bean-definition-overriding: true
+    lazy-initialization: true
+  jmx:
+    enabled: false
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  devtools:
+    restart:
+      enable: true
+  redis:
+    password: admin
+    database: 0
+    cluster:
+      nodes:
+        - 192.168.80.101:6371
+        - 192.168.80.101:6372
+        - 192.168.80.102:6371
+        - 192.168.80.102:6372
+        - 192.168.80.103:6371
+        - 192.168.80.103:6372
+      max-redirects: 5
+    timeout: 60000
+    lettuce:
+      pool:
+        max-active: 1000
+        max-idle: 16
+        min-idle: 8
+        max-wait: -1
+        enabled: true
+rocketmq:
+  name-server: 192.168.80.101:9876;192.168.80.102:9876;192.168.80.103:9876;
+  consumer:
+    consumeThreadMax: 8000
+    consumeTimeout: 30000
+    messageModel: clustering
+    consumeMessageBatchMaxSize: 100
+  producer:
+    send-message-timeout: 5000
+    retry-times-when-send-failed: 2
+    max-message-size: 4194304

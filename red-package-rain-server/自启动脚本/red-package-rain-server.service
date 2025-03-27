@@ -1,0 +1,12 @@
+[Unit]
+Description=red-package-rain-server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/app/red-package-rain-server/red-package-rain-server-start.sh
+ExecStop=/opt/app/red-package-rain-server/red-package-rain-server-stop.sh
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

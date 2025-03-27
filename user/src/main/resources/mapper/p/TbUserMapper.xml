@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yunxi.user.mapper.p.PUserMapper" >
+
+
+    <resultMap id="BaseResultMap" type="com.yunxi.user.model.po.TbUser" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="Is_Delete" property="isDelete" jdbcType="INTEGER" />
+        <result column="user_status" property="userStatus" jdbcType="INTEGER" />
+        <result column="nickename" property="nickename" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="Base_Column_List">
+        t.id,t.username,t.password,t.Is_Delete,t.user_status,t.nickename
+    </sql>
+
+    <!-- batch insert -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO tb_user (username,password,Is_Delete,user_status,nickename)
+        VALUES
+        <foreach collection="userList" item="item" index="index" separator="," >
+            (
+            #{item.username},
+            #{item.password},
+            #{item.isDelete},
+            #{item.userStatus},
+            #{item.nickename}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectListLimit" resultType="com.yunxi.user.model.po.TbUser">
+        SELECT u.id,u.username, u.password
+        FROM (
+            <if test="offset!=null and offset lt  100000">
+                <!-- 偏移量小的情况下使用以下sql，超过100000算大 -->
+                select id from tb_user where is_delete = 0 and user_status = 1 limit #{offset},#{pageSize}
+            </if>
+            <if test="offset!=null and offset gte  100000">
+                <!-- 偏移量大的情况下使用以下sql -->
+                select id from tb_user where id >  #{offset} and is_delete = 0 and user_status = 1  limit #{pageSize}
+            </if>
+        ) AS subquery
+        JOIN tb_user u ON subquery.id = u.id;
+    </select>
+
+    <select id="selectUserByUserName" resultType="com.yunxi.user.model.po.TbUser">
+        <!--注意这里需要添加索引，提高查询效率：CREATE INDEX username ON tb_user(username);-->
+        SELECT u.id,u.user_status as userStatus,u.username, u.password FROM tb_user u WHERE  u.username =  #{username}
+    </select>
+</mapper>

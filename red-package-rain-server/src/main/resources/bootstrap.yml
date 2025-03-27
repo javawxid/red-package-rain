@@ -1,0 +1,86 @@
+## 本地的red-package-rain-server-dev.yaml不起作用，直接读取nacos上的配置，本地的red-package-rain-server-dev.yaml文件保留下来作为参考
+#
+## 开发环境配置：
+## bootstrap.yml优先级比application.yml优先级高
+#spring:
+#  # prefix-{spring.profile.active}.${file-extension}
+#  # Nacos会根据当前环境去拼接配置名称查找相应配置文件，
+#  # 示例：{spring.application.name}-{spring.profiles.active}-{spring.cloud.nacos.config.file-extension}
+#  # 获取到值：red-package-rain-server-dev.yaml
+#  # Nacos会根据当前环境和file-extension参数去拼接配置文件名称
+#  profiles:
+#    # 本地环境local，开发环境dev，测试环境test，生产环境prod
+#    # 当前活动的配置文件为dev
+#    active: dev
+#    # 应用名称
+#  application:
+#    name: red-package-rain-server
+#  cloud:
+#    nacos:
+#      discovery:
+#        # 服务注册地址
+#        server-addr: mse-49d1b1026-p.nacos-ans.mse.aliyuncs.com
+#      config:
+#        #nacos配置中心地址
+#        server-addr: mse-49d1b1026-p.nacos-ans.mse.aliyuncs.com
+#        #配置中心的命名空间id dev
+#        namespace: f0a2b9ae-3b4b-4b83-aecb-2eea30e24f32
+#        #配置分组，默认没有也可以 LOCAL
+#        group: RED_PACKAGE_RAIN_LOCAL_GROUP
+#        #配置文件后缀，用于拼接配置配置文件名称，目前只支持yaml和properties
+#        file-extension: yaml
+#        #配置自动刷新
+#        refresh-enabled: true
+#        #配置文件的前缀，默认是application.name的值，如果配了prefix，就取prefix的值
+#        prefix: red-package-rain-server-dev
+#        # 配置编码
+#        encode: UTF-8
+#        # 用户名
+#        username: nacos
+#        # 密码
+#        password: nacos
+
+
+# 本地环境配置：
+# bootstrap.yml优先级比application.yml优先级高
+spring:
+  # prefix-{spring.profile.active}.${file-extension}
+  # Nacos会根据当前环境去拼接配置名称查找相应配置文件，
+  # 示例：{spring.application.name}-{spring.profiles.active}-{spring.cloud.nacos.config.file-extension}
+  # 获取到值：spring-cloud-security-oauth2-local.yaml
+  # Nacos会根据当前环境和file-extension参数去拼接配置文件名称
+  profiles:
+    # 本地环境local，开发环境dev，测试环境test，生产环境prod
+    # 当前活动的配置文件为dev
+    active: local
+    # 应用名称
+  application:
+    name: red-package-rain-server
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 192.168.80.101:4848
+        # 用户名
+        username: nacos
+        # 密码
+        password: nacos
+      config:
+        #nacos配置中心地址
+        server-addr: 192.168.80.101:4848
+        #配置中心的命名空间id local
+        namespace: 21c790b2-0b30-4433-a030-245f17203d2f
+        #配置分组，默认没有也可以 LOCAL
+        group: RED_PACKAGE_RAIN_LOCAL_GROUP
+        #配置文件后缀，用于拼接配置配置文件名称，目前只支持yaml和properties
+        file-extension: yaml
+        #配置自动刷新
+        refresh-enabled: true
+        #配置文件的前缀，默认是application.name的值，如果配了prefix，就取prefix的值
+        prefix: red-package-rain-server-local
+        # 配置编码
+        encode: UTF-8
+        # 用户名
+        username: nacos
+        # 密码
+        password: nacos

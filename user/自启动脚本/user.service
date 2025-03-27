@@ -1,0 +1,12 @@
+[Unit]
+Description=user
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/app/user/user-start.sh
+ExecStop=/opt/app/user/user-stop.sh
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

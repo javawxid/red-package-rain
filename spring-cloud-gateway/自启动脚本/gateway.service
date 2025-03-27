@@ -1,0 +1,12 @@
+[Unit]
+Description=spring-cloud-gateway
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/app/spring-cloud-gateway/gateway-start.sh
+ExecStop=/opt/app/spring-cloud-gateway/gateway-stop.sh
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

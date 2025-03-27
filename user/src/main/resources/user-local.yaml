@@ -1,0 +1,105 @@
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+  port: 8037
+  tomcat:
+    threads:
+      max: 8000
+      min-spare: 1000
+    max-connections: -1
+    accept-count: 20000
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    primary:
+      url: jdbc:mysql://192.168.80.101:33061/user?characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8
+      type: com.alibaba.druid.pool.DruidDataSource
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      password: node1master1root
+  shardingsphere:
+    datasource:
+      m1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://192.168.80.101:33061/red_package?serverTimezone=GMT%2B8
+        username: root
+        password: node1master1root
+      m2:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://192.168.80.102:33062/red_package?serverTimezone=GMT%2B8
+        username: root
+        password: node2slave1root
+      names: m1,m2
+    props:
+      sql:
+        show: true
+    jackson:
+      date-format: yyyy-MM-dd HH:mm:ss
+      time-zone: GMT+8
+  application:
+    name: user
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+  redis:
+    password: admin
+    database: 0
+    cluster:
+      nodes:
+        - 192.168.80.101:6371
+        - 192.168.80.101:6372
+        - 192.168.80.102:6371
+        - 192.168.80.102:6372
+        - 192.168.80.103:6371
+        - 192.168.80.103:6372
+      max-redirects: 5
+    timeout: 60000
+    lettuce:
+      pool:
+        max-active: 1000
+        max-idle: 16
+        min-idle: 8
+        max-wait: -1
+        enabled: true
+appid: wx9ccd9a18a5567939
+secret: 46c1f1a120f4c159e02ef2c9174e8eec
+baidu:
+  clientId: GvNKmLtz2ywefRDfSC5g9VCE
+  clientSecret: W9X5hGyaLmWBb6oGFsd7eHrBpFoixd1B
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 500000
+        loggerLevel: 'BASIC  '
+        readTimeout: 500000
+  compression:
+    request:
+      enabled: true
+      mime-types: text/xml,application/xml,application/json
+      min-request-size: 1024
+    response:
+      enabled: true
+  httpclient:
+    enabled: true
+    max-connections: 200
+    max-connections-per-route: 50
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  global-config:
+    db-column-underline: true
+    field-strategy: 1
+    id-type: 0
+security:
+  environment: http://127.0.0.1:8097
+filepath: D://opt

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yunxi.user.mapper.p.PConfigDBMapper" >
+    <!--校验子表是否存在 这里db_user写死了数据库名称，后面可以根据实际情况调整-->
+    <select id="checkTable" resultType="java.lang.Integer" >
+        SELECT 1 FROM INFORMATION_SCHEMA.`TABLES` WHERE TABLE_SCHEMA = #{databaseName} AND TABLE_NAME = #{tableName};
+    </select>
+    <!--创建子表结构-->
+    <update id="createConfigTable" >
+        CREATE TABLE `${newTableName}` LIKE `${sourceName}`;
+    </update>
+    <!--获取子表名-->
+    <select id="getTableInfoList" resultType="java.lang.String">
+        SELECT `TABLE_NAME`
+        FROM INFORMATION_SCHEMA.`TABLES`
+        WHERE `TABLE_NAME` LIKE #{tableName};
+    </select>
+    <!--获取主/子表结构列信息 这里db_user写死了数据库名称，后面可以根据实际情况调整-->
+    <select id="getColumnInfoList" resultType="com.yunxi.user.model.base.ColumnInfo">
+        SELECT `COLUMN_NAME` AS columnName
+             ,COLUMN_DEFAULT AS columnDef   -- 是否默认值
+             ,IS_NULLABLE AS isNull 		-- 是否允许为空
+             ,COLUMN_TYPE AS columnType		-- 字段类型
+             ,COLUMN_COMMENT AS comment	    -- 字段备注
+        FROM INFORMATION_SCHEMA.`COLUMNS`
+        WHERE TABLE_SCHEMA = #{databaseName}
+          AND `TABLE_NAME` = #{tableName}
+        ORDER BY ORDINAL_POSITION ASC;
+    </select>
+    <!--创建子表字段-->
+    <update id="alterTableColumn" parameterType="com.yunxi.user.model.base.ColumnInfo">
+        ALTER TABLE `${tableName}`
+        <choose>
+            <when test="addColumn">
+                ADD COLUMN
+            </when >
+            <otherwise>
+                MODIFY COLUMN
+            </otherwise>
+        </choose>
+        ${columnName}
+        ${columnType}
+        <choose>
+            <when test="isNull != null and isNull == 'NO'">
+                NOT NULL
+            </when >
+            <otherwise>
+                NULL
+            </otherwise>
+        </choose>
+        <if test="columnDef != null and columnDef != ''">
+            DEFAULT #{columnDef}
+        </if>
+        <if test="comment != null and comment != ''">
+            COMMENT #{comment}
+        </if>
+        <if test="alterName != null and alterName != ''">
+            AFTER ${alterName}
+        </if>
+    </update>
+    <!--获取所有索引-->
+    <select id="getAllIndexNameFromTableName" resultType="java.lang.String">
+        SELECT DISTINCT index_name FROM information_schema.statistics WHERE table_name = #{tableName} AND index_name != 'PRIMARY'
+    </select>
+    <!--获取拥有索引的列名-->
+    <select id="getAllIndexFromTableName" resultType="java.lang.String">
+        SELECT COLUMN_NAME FROM information_schema.statistics WHERE table_name = #{tableName} AND index_name = #{idxName} AND index_name != 'PRIMARY'
+    </select>
+    <!--获取索引名称-->
+    <select id="findIndexFromTableName" resultType="java.lang.String">
+        SELECT index_name FROM information_schema.statistics WHERE table_name = #{tableName} AND index_name = #{idxName}
+    </select>
+    <!--创建子表索引-->
+    <update id="commonCreatIndex">
+        CREATE INDEX ${idxName} ON `${tableName}`
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            `${item}`
+        </foreach>;
+    </update>
+</mapper>
